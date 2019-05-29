@@ -1,0 +1,7 @@
+elasticsearch-dsl>=6.0.0,<7.0.0
+lccnorm
+lxml
+psycopg2-binary
+pygithub
+pyyaml
+sqlalchemy
