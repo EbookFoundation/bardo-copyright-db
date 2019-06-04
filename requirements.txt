@@ -1,4 +1,5 @@
 elasticsearch-dsl>=6.0.0,<7.0.0
+flask-sqlalchemy
 lccnorm
 lxml
 psycopg2-binary
