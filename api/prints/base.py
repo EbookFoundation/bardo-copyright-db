@@ -11,12 +11,3 @@ APP_VERSION = 'v0.1'
 @bp.route('/')
 def query():
     return redirect(url_for('flasgger.apidocs'))
-    return jsonify({
-        'version': APP_VERSION,
-        'endpoints': [
-            '/numbers/registration/<regnumber>',
-            '/numbers/renewal/<rennumber>',
-            '/text/fulltext?query=<text query here>'
-        ]
-    })
-
