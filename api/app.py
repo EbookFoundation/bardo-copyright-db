@@ -15,7 +15,10 @@ def loadConfig():
             for key, value in sectionDict.items():
                 os.environ[key] = value
 
-loadConfig()
+try:
+    loadConfig()
+except FileNotFoundError:
+    pass
 
 application = Flask(__name__)
 application.register_blueprint(base.bp)
