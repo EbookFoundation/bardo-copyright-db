@@ -31,11 +31,18 @@ class Registration(BaseInner):
     regdate = Date()
 
 
+class Claimant(BaseInner):
+    name = Text(fields={'keyword': Keyword()})
+    claim_type = Keyword()
+
+
 class Renewal(BaseDoc):
+    uuid = Keyword(store=True)
     rennum = Keyword()
     rendate = Date()
     title = Text(fields={'keyword': Keyword()})
-    claimants = Text(multi=True)
+    
+    claimants = Nested(Claimant)
 
     class Index:
         with open('config.yaml', 'r') as yamlFile:
