@@ -1,4 +1,5 @@
 elasticsearch-dsl>=6.0.0,<7.0.0
+flasgger
 flask-sqlalchemy
 lccnorm
 lxml
