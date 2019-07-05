@@ -39,3 +39,7 @@ def create_app():
     docs = SwaggerDoc()
     swagger = Swagger(app, template=docs.getDocs())
     return app
+
+
+if __name__ == '__main__':
+    create_app()
