@@ -15,31 +15,25 @@ def loadConfig():
             for key, value in sectionDict.items():
                 os.environ[key] = value
 
-def create_app():
-    loadConfig()
-    
-    app = Flask(__name__)
-    app.register_blueprint(base.bp)
-    app.register_blueprint(search.search)
-    app.register_blueprint(uuid.uuid)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{}:{}@{}:{}/{}'.format(
-        os.environ['DB_USER'],
-        os.environ['DB_PSWD'],
-        os.environ['DB_HOST'],
-        os.environ['DB_PORT'],
-        os.environ['DB_NAME']
-    )
-    app.config['ELASTICSEARCH_INDEX_URI'] = '{}:{}'.format(
-        os.environ['ES_HOST'],
-        os.environ['ES_PORT']
-    )
-    app.config['SWAGGER'] = {'title': 'CCE Search'}
-    db.init_app(app)
-    elastic.init_app(app)
-    docs = SwaggerDoc()
-    swagger = Swagger(app, template=docs.getDocs())
-    return app
+loadConfig()
 
-
-if __name__ == '__main__':
-    create_app()
+application = Flask(__name__)
+application.register_blueprint(base.bp)
+application.register_blueprint(search.search)
+application.register_blueprint(uuid.uuid)
+application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{}:{}@{}:{}/{}'.format(
+    os.environ['DB_USER'],
+    os.environ['DB_PSWD'],
+    os.environ['DB_HOST'],
+    os.environ['DB_PORT'],
+    os.environ['DB_NAME']
+)
+application.config['ELASTICSEARCH_INDEX_URI'] = '{}:{}'.format(
+    os.environ['ES_HOST'],
+    os.environ['ES_PORT']
+)
+application.config['SWAGGER'] = {'title': 'CCE Search'}
+db.init_app(application)
+elastic.init_app(application)
+docs = SwaggerDoc()
+swagger = Swagger(application, template=docs.getDocs())
