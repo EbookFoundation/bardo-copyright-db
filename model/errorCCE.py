@@ -16,6 +16,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.exc import NoResultFound
 
 from model.core import Base, Core
+from model.xml import XML
 
 from model.author import Author
 from model.publisher import Publisher

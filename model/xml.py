@@ -13,7 +13,6 @@ from sqlalchemy import (
 )
 
 from model.core import Base, Core
-from model.errorCCE import ErrorCCE
 
 @compiles(String, 'postgresql')
 def compile_xml(type_, compiler, **kw):
