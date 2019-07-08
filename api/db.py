@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
 from model.cce import CCE
+from model.errorCCE import ErrorCCE
 from model.registration import Registration
 from model.renewal import Renewal, RENEWAL_REG
 from model.volume import Volume

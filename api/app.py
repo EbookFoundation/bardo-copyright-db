@@ -31,6 +31,8 @@ application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{}:{}@{}:{}/{}'.fo
     os.environ['DB_PORT'],
     os.environ['DB_NAME']
 )
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 application.config['ELASTICSEARCH_INDEX_URI'] = '{}:{}'.format(
     os.environ['ES_HOST'],
     os.environ['ES_PORT']
