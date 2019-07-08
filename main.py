@@ -44,7 +44,7 @@ def loadCCR(manager, loadFromTime, selectedYear):
 
 def indexUpdates(manager, loadFromTime):
     esIndexer = ESIndexer(manager, None)
-    # esIndexer.indexRecords(recType='cce')
+    esIndexer.indexRecords(recType='cce')
     esIndexer.indexRecords(recType='ccr')
 
 
