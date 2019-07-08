@@ -45,9 +45,7 @@ class Renewal(BaseDoc):
     claimants = Nested(Claimant)
 
     class Index:
-        with open('config.yaml', 'r') as yamlFile:
-            config = yaml.safe_load(yamlFile)
-            name = config['ELASTICSEARCH']['ES_CCR_INDEX']
+        name = os.environ['ES_CCR_INDEX']
 
 
 class CCE(BaseDoc):
@@ -60,6 +58,4 @@ class CCE(BaseDoc):
     registrations = Nested(Registration)
 
     class Index:
-        with open('config.yaml', 'r') as yamlFile:
-            config = yaml.safe_load(yamlFile)
-            name = config['ELASTICSEARCH']['ES_CCE_INDEX']
+        name = os.environ['ES_CCE_INDEX']

@@ -77,7 +77,10 @@ def loadConfig():
 
 if __name__ == '__main__':
     args = parseArgs()
-    loadConfig()
+    try:
+        loadConfig()
+    except FileNotFoundError:
+        pass
     main(
         secondsAgo=args.time,
         year=args.year,
