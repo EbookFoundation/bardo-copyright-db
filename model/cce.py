@@ -42,22 +42,25 @@ class CCE(Core, Base):
     aff_date_text = Column(Unicode)
 
     volume_id = Column(Integer, ForeignKey('volume.id'))
+    parent_cce_id = Column(Integer, ForeignKey('cce.id'))
 
     registrations = relationship('Registration', backref='cce')
     lccns = relationship('LCCN', backref='cce', cascade='all, delete-orphan')
     authors = relationship('Author', backref='cce', cascade='all, delete-orphan')
     publishers = relationship('Publisher', backref='cce', cascade='all, delete-orphan')
+    children_cces = relationship('CCE')
 
     def __repr__(self):
         return '<CCE(regnums={}, uuid={}, title={})>'.format(self.registrations, self.uuid, self.title)
 
-    def addRelationships(self, volume, xml, lccn=[], authors=[], publishers=[], registrations=[]):
+    def addRelationships(self, volume, xml, lccn=[], authors=[], publishers=[], registrations=[], partOf=None):
         self.volume = volume
         self.addLCCN(lccn)
         self.addAuthor(authors)
         self.addPublisher(publishers)
         self.addRegistration(registrations)
         self.addXML(xml)
+        self.setParentCCE(partOf)
     
     def addLCCN(self, lccns):
         self.lccns = [ LCCN(lccn=lccn) for lccn in lccns ]
@@ -92,12 +95,13 @@ class CCE(Core, Base):
             for reg in registrations
         ]
     
-    def updateRelationships(self, xml, lccn=[], authors=[], publishers=[], registrations=[]):
+    def updateRelationships(self, xml, lccn=[], authors=[], publishers=[], registrations=[], partOf=None):
         self.addXML(xml)
         self.updateLCCN(lccn)
         self.updateAuthors(authors)
         self.updatePublishers(publishers)
         self.updateRegistrations(registrations)
+        self.setParentCCE(partOf)
     
     def updateLCCN(self, lccns):
         currentLCCNs = [ l.lccn for l in self.lccns ]
@@ -156,6 +160,9 @@ class CCE(Core, Base):
     def updateReg(self, reg, registrations):
         newReg = CCE.getReg(reg.regnum, registrations)
         reg.update(newReg)
+    
+    def setParentCCE(self, parentID):
+        self.parent_cce_id = parentID
 
     @staticmethod
     def getReg(regnum, newRegs):

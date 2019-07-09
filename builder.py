@@ -117,6 +117,16 @@ class CCEFile():
 
     def parseEntry(self, entry, shared=[]):
         uuid = entry.get('id')
+        duplicate = entry.get('duplicateOf')
+        partOf = self.getEntryID(entry.get('partOf')) if entry.get('partOF') else None
+        
+        if duplicate is not None:
+            print('Found Duplicate Entry')
+            raise DataError(
+                'duplicate_entry',
+                uuid=uuid,
+                entry=entry
+            )
         
         if 'regnum' not in entry.attrib:
             print('Entry Missing REGNUM')
@@ -144,14 +154,19 @@ class CCEFile():
         regs = self.createRegistrations(regnums, regDates)
         existingRec = self.matchUUID(uuid)
         if existingRec:
-            self.updateEntry(existingRec, entryDates, entry, shared, regs)
+            self.updateEntry(existingRec, entryDates, entry, shared, regs, partOf)
         else:
-            self.createEntry(uuid, entryDates, entry, shared, regs)
+            self.createEntry(uuid, entryDates, entry, shared, regs, partOf)
 
     def matchUUID(self, uuid):
         return self.session.query(CCE).filter(CCE.uuid == uuid).one_or_none()
+    
+    def getEntryID(self, uuid):
+        ent = self.session.query(CCE.id).filter(CCE.uuid == uuid).one_or_none()
+        if ent: return ent.id
+        else: return None
 
-    def createEntry(self, uuid, dates, entry, shared, registrations):
+    def createEntry(self, uuid, dates, entry, shared, registrations, partOf):
         titles = self.createTitleList(entry, shared)
         authors = self.createAuthorList(entry, shared)
         copies = CCEFile.fetchText(entry, 'copies')
@@ -186,12 +201,13 @@ class CCEFile():
             authors=authors,
             publishers=publishers,
             lccn=lccn,
-            registrations=registrations
+            registrations=registrations,
+            partOf=partOf
         )
         self.session.add(cceRec)
         print('INSERT', cceRec)
 
-    def updateEntry(self, rec, dates, entry, shared, registrations):
+    def updateEntry(self, rec, dates, entry, shared, registrations, partOf):
         rec.title = self.createTitleList(entry, shared)
         rec.copies = CCEFile.fetchText(entry, 'copies')
         rec.description = CCEFile.fetchText(entry, 'desc')
@@ -218,7 +234,8 @@ class CCEFile():
             authors=authors,
             publishers=publishers,
             lccn=lccn,
-            registrations=registrations
+            registrations=registrations,
+            partOf=partOf
         )
         print('UPDATE', rec)
 
