@@ -28,6 +28,8 @@ def fullTextQuery():
     for entry in matchingDocs:
         if entry.meta.index == 'cce':
             dbEntry = qManager.registrationQuery(entry.uuid)
+            if dbEntry.parent_cce_id:
+                dbEntry = qManager.getParentCCE(dbEntry.parent_cce_id)
             textResponse.addResult(MultiResponse.parseEntry(
                 dbEntry, 
                 xml=sourceReturn
@@ -66,6 +68,8 @@ def regQuery(regnum):
     qManager = QueryManager(db.session)
     for entry in matchingDocs:
         dbEntry = qManager.registrationQuery(entry.uuid)
+        if dbEntry.parent_cce_id:
+            dbEntry = qManager.getParentCCE(dbEntry.parent_cce_id)
         regResponse.addResult(MultiResponse.parseEntry(
             dbEntry,
             xml=sourceReturn

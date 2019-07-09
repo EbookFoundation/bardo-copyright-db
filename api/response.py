@@ -39,7 +39,11 @@ class Response():
                 'part': dbEntry.volume.part,
                 'page': dbEntry.page,
                 'page_position': dbEntry.page_position
-            }
+            },
+            'has_parts': [
+                Response.parseEntry(part)
+                for part in dbEntry.children_cces
+            ]
         }
         response['renewals'] = [
             cls.parseRenewal(ren, source=xml)

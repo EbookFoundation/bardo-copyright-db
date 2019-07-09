@@ -26,3 +26,6 @@ class QueryManager():
     
     def orphanRenewalQuery(self, uuid):
         return self.session.query(Renewal).filter(Renewal.uuid == uuid).one()
+    
+    def getParentCCE(self, parentID):
+        return self.session.query(CCE).get(parentID)
