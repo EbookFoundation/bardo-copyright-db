@@ -31,16 +31,21 @@ class Registration(BaseInner):
     regdate = Date()
 
 
+class Claimant(BaseInner):
+    name = Text(fields={'keyword': Keyword()})
+    claim_type = Keyword()
+
+
 class Renewal(BaseDoc):
+    uuid = Keyword(store=True)
     rennum = Keyword()
     rendate = Date()
     title = Text(fields={'keyword': Keyword()})
-    claimants = Text(multi=True)
+    
+    claimants = Nested(Claimant)
 
     class Index:
-        with open('config.yaml', 'r') as yamlFile:
-            config = yaml.safe_load(yamlFile)
-            name = config['ELASTICSEARCH']['ES_CCR_INDEX']
+        name = os.environ['ES_CCR_INDEX']
 
 
 class CCE(BaseDoc):
@@ -53,6 +58,4 @@ class CCE(BaseDoc):
     registrations = Nested(Registration)
 
     class Index:
-        with open('config.yaml', 'r') as yamlFile:
-            config = yaml.safe_load(yamlFile)
-            name = config['ELASTICSEARCH']['ES_CCE_INDEX']
+        name = os.environ['ES_CCE_INDEX']

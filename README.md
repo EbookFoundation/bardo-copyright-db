@@ -9,6 +9,8 @@ The two projects that this data is drawn from are hosted on GitHub, more informa
 - (Catalog of Copyright Entries)[https://github.com/NYPL/catalog_of_copyright_entries_project]
 - (Catalog of Copyright Entries Renewals)[https://github.com/NYPL/cce-renewals]
 
+This repository also includes an API for querying the created database using ElasticSearch as a search layer and `Flask` as the application framework. See below for more detail on running and using the search API.
+
 ## Database
 
 This script generates and updates a Postgresql database and ElasticSearch search layer. It scans the above repository for updated source files and inserts/updates the appropriate records, ensuring that the search layer is kept up to date following these changes.
@@ -62,3 +64,42 @@ Several command-line arguments control the options for the execution of this scr
 - `-t` or `--time` The time ago in seconds to check for updated records in the GitHub repositories. This allows for only updating changed records
 - `-y` or `--year` A specific year to load from either the entries or renewals
 - `-x` or `--exclude` Set to exclude either the entries (with `cce`) or the renewals (with `ccr`) from the current execution. Useful when used in conjunction with the `year` parameter to control what records are updated.
+
+## API
+
+This is a basic API that allows for a limited set of queries to be executed against the database. It allows for lookups by fulltext search, registration/renewal numbers and internal UUID numbers (to retrieve specific records). The returned objects show relationships between registrations and renewals and can optionally return the source data from which each record was created.
+
+### Running the API
+
+To start the api, ensure that that you've updated your `virtualenv` with the most recent version of the requirements file and run the following commands:
+
+1) `export FLASK_ENV=development`
+2) `export FLASK_APP=api/app.py`
+3) `python -m flask run`
+
+This will start the flask application at `localhost:5000`. Accessing that page will redirect you to a SwaggerDocs page that describes the available endpoints, their parameters, response object and allow users a chance to experiment with the endpoints.
+
+### Using the API
+
+The API provides 5 endpoints for retrieving registration and renewal records. These are split between `Search` and `Lookup` endpoints
+
+#### Search
+
+The search endpoints return many or no object depending on what search terms are used. All three search endpoints share 3 query parameters:
+
+- `page`: The page of results to return. Defaults to 0
+- `per_page`: The number of results to return per page. Defaults to 10
+- `source`: A flag to set the return of the source XML/CSV data. Defaults to `false`
+
+The individual endpoints are:
+
+- `/search/fulltext?query=<query string>`: A full text query
+- `/search/registration/<regnum>`: A search for a specific registration number
+- `/search/renewal/<rennum>`: A search for a specific renewal number
+
+#### Lookup
+
+The lookup endpoints return data for a specific Registration or Renewal record. These do not accept additional parameters, but return the `source` data for any record. These endpoints use the internally generated `UUID` numbers to ensure a globally unique lookup value
+
+- `/registration/<uuid>`: Returns a single Registration record
+- `/renewal/<uuid>`: Returns a single Renewal record

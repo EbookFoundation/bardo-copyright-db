@@ -3,11 +3,6 @@ from datetime import datetime, timedelta
 import os
 import yaml
 
-from sessionManager import SessionManager
-from builder import CCEReader, CCEFile
-from renBuilder import CCRReader, CCRFile
-from esIndexer import ESIndexer
-
 
 def main(secondsAgo=None, year=None, exclude=None, reinit=False):
     manager = SessionManager()
@@ -20,12 +15,12 @@ def main(secondsAgo=None, year=None, exclude=None, reinit=False):
     if secondsAgo is not None:
         loadFromTime = startTime - timedelta(seconds=secondsAgo)
 
-    #if exclude != 'cce':
-    #    loadCCE(manager, loadFromTime, year)
-    #if exclude != 'ccr':
-    #    loadCCR(manager, loadFromTime, year)
+    if exclude != 'cce':
+        loadCCE(manager, loadFromTime, year)
+    if exclude != 'ccr':
+        loadCCR(manager, loadFromTime, year)
     
-    indexUpdates(manager, None)
+    indexUpdates(manager, loadFromTime)
     
     manager.closeConnection()
     
@@ -44,7 +39,7 @@ def loadCCR(manager, loadFromTime, selectedYear):
 
 def indexUpdates(manager, loadFromTime):
     esIndexer = ESIndexer(manager, None)
-    # esIndexer.indexRecords(recType='cce')
+    esIndexer.indexRecords(recType='cce')
     esIndexer.indexRecords(recType='ccr')
 
 
@@ -77,7 +72,16 @@ def loadConfig():
 
 if __name__ == '__main__':
     args = parseArgs()
-    loadConfig()
+    try:
+        loadConfig()
+    except FileNotFoundError:
+        pass
+
+    from sessionManager import SessionManager
+    from builder import CCEReader, CCEFile
+    from renBuilder import CCRReader, CCRFile
+    from esIndexer import ESIndexer
+
     main(
         secondsAgo=args.time,
         year=args.year,
