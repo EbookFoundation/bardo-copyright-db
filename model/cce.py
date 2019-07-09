@@ -137,11 +137,11 @@ class CCE(Core, Base):
     def updateRegistrations(self, registrations):
         existingRegs = [
             self.updateReg(r, registrations) for r in self.registrations
-            if r.regnum in [ r['regnum'] for r in registrations ]
+            if r.regnum in [ n['regnum'] for n in registrations ]
         ]
         newRegs = [
             r for r in registrations
-            if r['regnum'] not in [ r.regnum for r in existingRegs ]
+            if r['regnum'] not in [ n.regnum for n in existingRegs ]
         ]
         self.registrations = existingRegs + [
             Registration(
@@ -155,7 +155,11 @@ class CCE(Core, Base):
     
     def updateReg(self, reg, registrations):
         newReg = CCE.getReg(reg.regnum, registrations)
-        reg.update(newReg)
+        if newReg: reg.update(newReg)
+        return reg
+    
+    def setParentCCE(self, parentID):
+        self.parent_cce_id = parentID
 
     @staticmethod
     def getReg(regnum, newRegs):
