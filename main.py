@@ -38,7 +38,7 @@ def loadCCR(manager, loadFromTime, selectedYear):
     ccrReader.importYears()
 
 def indexUpdates(manager, loadFromTime):
-    esIndexer = ESIndexer(manager, None)
+    esIndexer = ESIndexer(manager, loadFromTime)
     esIndexer.indexRecords(recType='cce')
     esIndexer.indexRecords(recType='ccr')
 
