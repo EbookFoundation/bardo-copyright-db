@@ -1,12 +1,8 @@
 import os
 from datetime import datetime
-from elasticsearch.helpers import bulk, BulkIndexError, streaming_bulk
+from elasticsearch.helpers import BulkIndexError, streaming_bulk
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import (
-    ConnectionError,
-    TransportError,
-    ConflictError
-)
+from elasticsearch.exceptions import ConnectionError
 from elasticsearch_dsl import connections
 from elasticsearch_dsl.wrappers import Range
 
@@ -16,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 from model.cce import CCE as dbCCE
 from model.renewal import Renewal as dbRenewal
-from model.registration import Registration as dbRegistration
+from model.registration import Registration as dbRegistration  # noqa: F401
 from model.elastic import (
     CCE,
     Registration,
@@ -31,7 +27,10 @@ class ESIndexer():
         self.ccr_index = os.environ['ES_CCR_INDEX']
         self.client = None
         self.session = manager.session
-        self.loadFromTime = loadFromTime if loadFromTime else datetime.strptime('1970-01-01', '%Y-%m-%d')
+        if loadFromTime:
+            self.loadFromTime = loadFromTime
+        else:
+            self.loadFromTime = datetime.strptime('1970-01-01', '%Y-%m-%d')
 
         self.createElasticConnection()
         self.createIndex()
@@ -57,7 +56,7 @@ class ESIndexer():
             CCE.init()
         if self.client.indices.exists(index=self.ccr_index) is False:
             Renewal.init()
-    
+
     def indexRecords(self, recType='cce'):
         """Process the current batch of updating records. This utilizes the
         elasticsearch-py bulk helper to import records in chunks of the
@@ -68,14 +67,17 @@ class ESIndexer():
         success, failure = 0, 0
         errors = []
         try:
-            for status, work in streaming_bulk(self.client, self.process(recType)):
+            for status, work in streaming_bulk(
+                self.client,
+                self.process(recType)
+            ):
                 print(status, work)
                 if not status:
                     errors.append(work)
                     failure += 1
                 else:
                     success += 1
-            
+
             print('Success {} | Failure: {}'.format(success, failure))
         except BulkIndexError as err:
             print('One or more records in the chunk failed to import')
@@ -91,7 +93,8 @@ class ESIndexer():
             for ccr in self.retrieveRenewals():
                 esRen = ESRen(ccr)
                 esRen.indexRen()
-                if esRen.renewal.rennum == '': continue
+                if esRen.renewal.rennum == '':
+                    continue
                 yield esRen.renewal.to_dict(True)
 
     def retrieveEntries(self):
@@ -99,7 +102,7 @@ class ESIndexer():
             .filter(dbCCE.date_modified > self.loadFromTime)
         for cce in retQuery.all():
             yield cce
-    
+
     def retrieveRenewals(self):
         renQuery = self.session.query(dbRenewal)\
             .filter(dbRenewal.date_modified > self.loadFromTime)
@@ -110,10 +113,10 @@ class ESIndexer():
 class ESDoc():
     def __init__(self, cce):
         self.dbRec = cce
-        self.entry = None 
-        
+        self.entry = None
+
         self.initEntry()
-    
+
     def initEntry(self):
         print('Creating ES record for {}'.format(self.dbRec))
 
@@ -122,9 +125,9 @@ class ESDoc():
     def indexEntry(self):
         self.entry.uuid = self.dbRec.uuid
         self.entry.title = self.dbRec.title
-        self.entry.authors = [ a.name for a in self.dbRec.authors ]
-        self.entry.publishers = [ p.name for p in self.dbRec.publishers ]
-        self.entry.lccns = [ l.lccn for l in self.dbRec.lccns ]
+        self.entry.authors = [a.name for a in self.dbRec.authors]
+        self.entry.publishers = [p.name for p in self.dbRec.publishers]
+        self.entry.lccns = [l.lccn for l in self.dbRec.lccns]
         self.entry.registrations = [
             Registration(regnum=r.regnum, regdate=r.reg_date)
             for r in self.dbRec.registrations
@@ -134,10 +137,10 @@ class ESDoc():
 class ESRen():
     def __init__(self, ccr):
         self.dbRen = ccr
-        self.renewal = None 
-        
+        self.renewal = None
+
         self.initRenewal()
-    
+
     def initRenewal(self):
         print('Creating ES record for {}'.format(self.dbRen))
 
