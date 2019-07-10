@@ -25,14 +25,13 @@ class ESIndexer():
     def __init__(self, manager, loadFromTime):
         self.cce_index = os.environ['ES_CCE_INDEX']
         self.ccr_index = os.environ['ES_CCR_INDEX']
-        self.client = None
+        self.client = self.createElasticConnection()
         self.session = manager.session
         if loadFromTime:
             self.loadFromTime = loadFromTime
         else:
             self.loadFromTime = datetime.strptime('1970-01-01', '%Y-%m-%d')
 
-        self.createElasticConnection()
         self.createIndex()
 
         configure_mappers()
@@ -42,14 +41,16 @@ class ESIndexer():
         port = os.environ['ES_PORT']
         timeout = int(os.environ['ES_TIMEOUT'])
         try:
-            self.client = Elasticsearch(
+            client = Elasticsearch(
                 hosts=[{'host': host, 'port': port}],
                 timeout=timeout
             )
         except ConnectionError as err:
             print('Failed to connect to ElasticSearch instance')
             raise err
-        connections.connections._conns['default'] = self.client
+        connections.connections._conns['default'] = client
+
+        return client
 
     def createIndex(self):
         if self.client.indices.exists(index=self.cce_index) is False:
@@ -71,7 +72,6 @@ class ESIndexer():
                 self.client,
                 self.process(recType)
             ):
-                print(status, work)
                 if not status:
                     errors.append(work)
                     failure += 1
@@ -113,14 +113,11 @@ class ESIndexer():
 class ESDoc():
     def __init__(self, cce):
         self.dbRec = cce
-        self.entry = None
-
-        self.initEntry()
+        self.entry = self.initEntry()
 
     def initEntry(self):
         print('Creating ES record for {}'.format(self.dbRec))
-
-        self.entry = CCE(meta={'id': self.dbRec.uuid})
+        return CCE(meta={'id': self.dbRec.uuid})
 
     def indexEntry(self):
         self.entry.uuid = self.dbRec.uuid
@@ -137,14 +134,11 @@ class ESDoc():
 class ESRen():
     def __init__(self, ccr):
         self.dbRen = ccr
-        self.renewal = None
-
-        self.initRenewal()
+        self.renewal = self.initRenewal()
 
     def initRenewal(self):
         print('Creating ES record for {}'.format(self.dbRen))
-
-        self.renewal = Renewal(meta={'id': self.dbRen.renewal_num})
+        return Renewal(meta={'id': self.dbRen.renewal_num})
 
     def indexRen(self):
         self.renewal.uuid = self.dbRen.uuid
