@@ -39,7 +39,11 @@ class CCE(Core, Base):
 
     volume_id = Column(Integer, ForeignKey('volume.id'))
 
-    registrations = relationship('Registration', backref='cce')
+    registrations = relationship(
+        'Registration',
+        backref='cce',
+        cascade='all, delete-orphan'
+    )
     lccns = relationship('LCCN', backref='cce', cascade='all, delete-orphan')
     authors = relationship('Author',
                            backref='cce', cascade='all, delete-orphan')

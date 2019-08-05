@@ -14,9 +14,11 @@ from sqlalchemy import (
 
 from model.core import Base, Core
 
+
 @compiles(String, 'postgresql')
 def compile_xml(type_, compiler, **kw):
-    return "XML"
+    return 'XML'
+
 
 ENTRY_XML = Table(
     'entry_xml',
@@ -32,19 +34,24 @@ ERROR_XML = Table(
     Column('xml_id', Integer, ForeignKey('xml.id'), index=True)
 )
 
+
 class XML(Core, Base):
     __tablename__ = 'xml'
     id = Column(Integer, primary_key=True)
     xml_source = Column(String)
-    
+
     entry = relationship(
         'CCE',
         secondary=ENTRY_XML,
-        backref='xml_sources'
+        backref='xml_sources',
+        single_parent=True,
+        cascade='all, delete-orphan'
     )
 
     error_entry = relationship(
         'ErrorCCE',
         secondary=ERROR_XML,
-        backref='xml_sources'
+        backref='xml_sources',
+        single_parent=True,
+        cascade='all, delete-orphan'
     )
