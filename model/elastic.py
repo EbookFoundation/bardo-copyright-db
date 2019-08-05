@@ -1,7 +1,5 @@
 import os
-import yaml
 from elasticsearch_dsl import (
-    Index,
     Document,
     Keyword,
     Text,
@@ -45,7 +43,7 @@ class Renewal(BaseDoc):
     claimants = Nested(Claimant)
 
     class Index:
-        name = os.environ['ES_CCR_INDEX']
+        name = os.environ.get('ES_CCR_INDEX', None)
 
 
 class CCE(BaseDoc):
@@ -58,4 +56,4 @@ class CCE(BaseDoc):
     registrations = Nested(Registration)
 
     class Index:
-        name = os.environ['ES_CCE_INDEX']
+        name = os.environ.get('ES_CCE_INDEX', None)

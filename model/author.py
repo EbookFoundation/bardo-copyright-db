@@ -1,17 +1,10 @@
 from sqlalchemy import (
     Column,
-    Date,
     ForeignKey,
     Integer,
-    String,
     Unicode,
     Boolean
 )
-
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm.exc import NoResultFound
 
 from model.core import Base, Core
 
