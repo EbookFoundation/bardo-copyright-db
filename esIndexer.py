@@ -117,7 +117,7 @@ class ESDoc():
 
     def initEntry(self):
         print('Creating ES record for {}'.format(self.dbRec))
-        return CCE(meta={'id': self.dbRec.uuid})
+        return CCE(meta={'id': self.dbRec.uuid, 'index': 'cce'})
 
     def indexEntry(self):
         self.entry.uuid = self.dbRec.uuid
@@ -138,7 +138,7 @@ class ESRen():
 
     def initRenewal(self):
         print('Creating ES record for {}'.format(self.dbRen))
-        return Renewal(meta={'id': self.dbRen.renewal_num})
+        return Renewal(meta={'id': self.dbRen.renewal_num, 'index': 'ccr'})
 
     def indexRen(self):
         self.renewal.uuid = self.dbRen.uuid
