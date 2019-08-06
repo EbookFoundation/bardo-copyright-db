@@ -102,9 +102,9 @@ def renQuery(rennum):
     return make_response(jsonify(renResponse.createResponse(200)), 200)
 
 
-def parseRetRenewal(dbRenewal):
+def parseRetRenewal(dbRenewal, source=False):
     if len(dbRenewal.registrations) == 0:
-        return [MultiResponse.parseRenewal(dbRenewal)]
+        return [MultiResponse.parseRenewal(dbRenewal, source=source)]
 
     registrations = []
     for reg in dbRenewal.registrations:
