@@ -1,6 +1,4 @@
-from flask import (
-    Blueprint, request, session, url_for, redirect, current_app, jsonify
-)
+from flask import Blueprint, request, jsonify, make_response
 from sqlalchemy.orm.exc import NoResultFound
 
 from api.db import db, QueryManager
@@ -15,7 +13,11 @@ def fullTextQuery():
     queryText = request.args.get('query', '')
     sourceReturn = request.args.get('source', False)
     page, perPage = MultiResponse.parsePaging(request.args)
-    matchingDocs = elastic.query_fulltext(queryText, page=page, perPage=perPage)
+    matchingDocs = elastic.query_fulltext(
+        queryText,
+        page=page,
+        perPage=perPage
+    )
     textResponse = MultiResponse(
         'text',
         matchingDocs.hits.total,
@@ -29,7 +31,7 @@ def fullTextQuery():
         if entry.meta.index == 'cce':
             dbEntry = qManager.registrationQuery(entry.uuid)
             textResponse.addResult(MultiResponse.parseEntry(
-                dbEntry, 
+                dbEntry,
                 xml=sourceReturn
             ))
         else:
@@ -46,8 +48,8 @@ def fullTextQuery():
                     source=sourceReturn
                 ))
 
-    textResponse.createDataBlock()    
-    return jsonify(textResponse.createResponse(200))
+    textResponse.createDataBlock()
+    return make_response(jsonify(textResponse.createResponse(200)), 200)
 
 
 @search.route('/registration/<regnum>', methods=['GET'])
@@ -72,7 +74,7 @@ def regQuery(regnum):
         ))
 
     regResponse.createDataBlock()
-    return jsonify(regResponse.createResponse(200))
+    return make_response(jsonify(regResponse.createResponse(200)), 200)
 
 
 @search.route('/renewal/<rennum>', methods=['GET'])
@@ -93,11 +95,11 @@ def renQuery(rennum):
         dbRenewal = qManager.renewalQuery(entry.uuid)
         renResponse.extendResults(parseRetRenewal(
             dbRenewal,
-            source=sourceReturn    
+            source=sourceReturn
         ))
 
     renResponse.createDataBlock()
-    return jsonify(renResponse.createResponse(200))
+    return make_response(jsonify(renResponse.createResponse(200)), 200)
 
 
 def parseRetRenewal(dbRenewal):
