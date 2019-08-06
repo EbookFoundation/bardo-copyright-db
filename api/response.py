@@ -1,3 +1,5 @@
+from datetime import datetime
+
 
 class Response():
     def __init__(self, queryType, endpoint):
@@ -24,14 +26,17 @@ class Response():
             'title': dbEntry.title,
             'copies': dbEntry.copies,
             'description': dbEntry.description,
-            'pub_date': dbEntry.pub_date_text,
-            'copy_date': dbEntry.copy_date_text,
+            'pub_date': Response.formatDate(dbEntry.pub_date),
+            'copy_date': Response.formatDate(dbEntry.copy_date),
             'registrations': [
-                {'number': r.regnum, 'date': r.reg_date_text}
+                {
+                    'number': r.regnum,
+                    'date': Response.formatDate(r.reg_date)
+                }
                 for r in dbEntry.registrations
             ],
-            'authors': [ a.name for a in dbEntry.authors ],
-            'publishers': [ p.name for p in dbEntry.publishers ],
+            'authors': [a.name for a in dbEntry.authors],
+            'publishers': [p.name for p in dbEntry.publishers],
             'source': {
                 'url': dbEntry.volume.source,
                 'series': dbEntry.volume.series,
@@ -47,7 +52,8 @@ class Response():
             for ren in reg.renewals
         ]
 
-        if xml: response['xml'] = dbEntry.xml_sources[0].xml_source
+        if xml:
+            response['xml'] = dbEntry.xml_sources[0].xml_source
 
         return response
 
@@ -58,13 +64,13 @@ class Response():
             'uuid': dbRenewal.uuid,
             'title': dbRenewal.title,
             'author': dbRenewal.author,
-            'claimants': [ 
-                {'name': c.name, 'type': c.claimant_type} 
-                for c in dbRenewal.claimants 
+            'claimants': [
+                {'name': c.name, 'type': c.claimant_type}
+                for c in dbRenewal.claimants
             ],
             'new_matter': dbRenewal.new_matter,
             'renewal_num': dbRenewal.renewal_num,
-            'renewal_date': dbRenewal.renewal_date_text,
+            'renewal_date': Response.formatDate(dbRenewal.renewal_date),
             'notes': dbRenewal.notes,
             'volume': dbRenewal.volume,
             'part': dbRenewal.part,
@@ -72,16 +78,21 @@ class Response():
             'page': dbRenewal.page
         }
 
-        if source: renewal['source'] = dbRenewal.source
+        if source:
+            renewal['source'] = dbRenewal.source
 
         return renewal
+
+    @staticmethod
+    def formatDate(date):
+        return datetime.strftime(date, '%Y-%m-%d')
 
 
 class SingleResponse(Response):
     def __init__(self, queryType, endpoint):
         super().__init__(queryType, endpoint)
         self.result = None
-    
+
     def createDataBlock(self):
         self.data = self.result
 
@@ -94,10 +105,10 @@ class MultiResponse(Response):
         self.page = page
         self.perPage = perPage
         self.results = []
-    
+
     def addResult(self, result):
         self.results.append(result)
-    
+
     def extendResults(self, results):
         self.results.extend(results)
 
@@ -108,13 +119,13 @@ class MultiResponse(Response):
             'paging': self.createPaging(),
             'results': self.results
         }
-    
+
     def createQuery(self):
         return {
             'endpoint': self.endpoint,
             'term': self.query
         }
-    
+
     def createPaging(self):
         paging = {}
         if self.type == 'text':
@@ -130,7 +141,7 @@ class MultiResponse(Response):
             )
         else:
             paging['first'] = None
-        
+
         prevPage = self.page - 1
         if prevPage >= 0:
             paging['previous'] = '{}&page={}&per_page={}'.format(
@@ -140,7 +151,7 @@ class MultiResponse(Response):
             )
         else:
             paging['previous'] = None
-        
+
         nextPage = self.page + 1
         if (nextPage * self.perPage) < self.total:
             paging['next'] = '{}&page={}&per_page={}'.format(
@@ -150,10 +161,10 @@ class MultiResponse(Response):
             )
         else:
             paging['next'] = None
-        
+
         lastPage = int((self.total - self.perPage) / self.perPage)
         if (
-            self.page * self.perPage < self.total and 
+            self.page * self.perPage < self.total and
             self.total > self.perPage
         ):
             paging['last'] = '{}&page={}&per_page={}'.format(
@@ -163,9 +174,9 @@ class MultiResponse(Response):
             )
         else:
             paging['last'] = None
-        
+
         return paging
-    
+
     @staticmethod
     def parsePaging(reqArgs):
         perPage = int(reqArgs.get('per_page', 10))

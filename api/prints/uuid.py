@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -30,7 +30,10 @@ def regQuery(uuid):
     except DataError:
         status = 500
         err = LookupError('Malformed UUID {} received'.format(uuid))
-    return jsonify(regRecord.createResponse(status, err=err))
+    return make_response(
+        jsonify(regRecord.createResponse(status, err=err)),
+        status
+    )
 
 
 @uuid.route('/renewal/<uuid>', methods=['GET'])
@@ -51,7 +54,10 @@ def renQuery(uuid):
     except DataError:
         status = 500
         err = LookupError('Malformed UUID {} received'.format(uuid))
-    return jsonify(renRecord.createResponse(status, err=err))
+    return make_response(
+        jsonify(renRecord.createResponse(status, err=err)),
+        status
+    )
 
 
 def parseRetRenewal(dbRenewal):
