@@ -47,7 +47,7 @@ class CCE(Core, Base):
     lccns = relationship('LCCN', backref='cce', cascade='all, delete-orphan')
     authors = relationship('Author',
                            backref='cce', cascade='all, delete-orphan')
-    publishers = relationship('Publisher', 
+    publishers = relationship('Publisher',
                               backref='cce', cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -120,25 +120,27 @@ class CCE(Core, Base):
 
     def updateAuthors(self, authors):
         currentAuthors = [(a.name, a.primary) for a in self.authors]
-        newAuthors = filter(lambda x: x[0] is None, authors)
+        newAuthors = filter(lambda x: x[0] is not None, authors)
         if newAuthors != currentAuthors:
             self.authors = [
                 a for a in self.authors
-                if a.name in list(set(currentAuthors) & set(newAuthors))
+                if (a.name, a.primary) in
+                list(set(currentAuthors) & set(newAuthors))
             ]
             for new in list(set(newAuthors) - set(currentAuthors)):
                 self.authors.append(Author(name=new[0], primary=new[1]))
 
     def updatePublishers(self, publishers):
-        currentPublishers = [(a.name, a.claimant) for a in self.publishers]
+        currentPublishers = [(p.name, p.claimant) for p in self.publishers]
         newPublishers = [
             (p[0], True if p[1] == 'yes' else False)
-            for p in filter(lambda x: x[0] is None, publishers)
+            for p in filter(lambda x: x[0] is not None, publishers)
         ]
         if newPublishers != currentPublishers:
-            self.authors = [
-                a for a in self.authors
-                if a.name in list(set(currentPublishers) & set(newPublishers))
+            self.publishers = [
+                p for p in self.publishers
+                if (p.name, p.claimant) in
+                list(set(currentPublishers) & set(newPublishers))
             ]
             for new in list(set(newPublishers) - set(currentPublishers)):
                 self.publishers.append(Publisher(name=new[0], claimant=new[1]))
