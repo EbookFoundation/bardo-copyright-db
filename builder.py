@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime
+from dateutil import parser
 from github import Github
 import lccnorm
 from lxml import etree
@@ -431,5 +432,13 @@ class CCEFile():
 
     @staticmethod
     def fetchDateValue(date, text=False):
-        x = 1 if text else 0
-        return date[0][x] if len(date) > 0 else None
+        if len(date) > 0:
+            if text is False:
+                try:
+                    return parser.parse(date[0][0])
+                except (ValueError, TypeError):
+                    pass
+            else:
+                return date[0][1]
+
+        return None
