@@ -6,7 +6,7 @@ from lxml import etree
 import os
 import re
 import traceback
-from sqlalchemy.exc import DataError as sqlDataError
+from sqlalchemy.exc import InvalidRequestError
 
 from model.cce import CCE
 from model.errorCCE import ErrorCCE
@@ -103,8 +103,10 @@ class CCEFile():
             self.pagePos += 1
             try:
                 childOp(child)
-            except (DataError, sqlDataError) as err:
+            except (DataError, InvalidRequestError) as err:
                 print('Caught error')
+                if type(err).__name__ == 'InvalidRequestError':
+                    self.session.rollback()
                 self.createErrorEntry(
                     getattr(err, 'uuid', child.get('id')),
                     getattr(err, 'regnum', None),
