@@ -6,12 +6,14 @@ from lxml import etree
 import os
 import re
 import traceback
+from sqlalchemy.exc import DataError as sqlDataError
 
 from model.cce import CCE
 from model.errorCCE import ErrorCCE
 from model.volume import Volume
 
 from helpers.errors import DataError
+
 
 class CCEReader():
     def __init__(self, manager=None):
@@ -22,36 +24,42 @@ class CCEReader():
 
     def loadYears(self, selectedYear):
         for year in self.repo.get_contents('/xml'):
-            if not re.match(r'^19[0-9]{2}$', year.name): continue
-            if selectedYear is not None and year.name != selectedYear: continue
+            if not re.match(r'^19[0-9]{2}$', year.name):
+                continue
+            if selectedYear is not None and year.name != selectedYear:
+                continue
             yearInfo = {'path': year.path, 'yearFiles': []}
             self.cceYears[year.name] = yearInfo
-    
+
     def loadYearFiles(self, year, loadFromTime):
         yearInfo = self.cceYears[year]
         for yearFile in self.repo.get_contents(yearInfo['path']):
-            if 'alto' in yearFile.name or 'TOC' in yearFile.name: continue
+            if 'alto' in yearFile.name or 'TOC' in yearFile.name:
+                continue
             fileCommit = self.repo.get_commits(path=yearFile.path)[0]
             commitDate = fileCommit.commit.committer.date
-            if loadFromTime is not None and commitDate < loadFromTime: continue
+            if loadFromTime is not None and commitDate < loadFromTime:
+                continue
             self.cceYears[year]['yearFiles'].append({
                 'filename': yearFile.name,
                 'path': yearFile.path,
                 'sha': yearFile.sha
             })
-    
+
     def getYearFiles(self, loadFromTime):
         for year in self.cceYears.keys():
             print('Loading files for {}'.format(year))
             self.loadYearFiles(year, loadFromTime)
-    
+
     def importYearData(self):
-        for year in self.cceYears.keys(): self.importYear(year)
-    
+        for year in self.cceYears.keys():
+            self.importYear(year)
+
     def importYear(self, year):
         yearFiles = self.cceYears[year]['yearFiles']
-        for yearFile in yearFiles: self.importFile(yearFile)
-    
+        for yearFile in yearFiles:
+            self.importFile(yearFile)
+
     def importFile(self, yearFile):
         print('Importing data from {}'.format(yearFile['filename']))
         cceFile = CCEFile(self.repo, yearFile, self.dbManager.session)
@@ -86,7 +94,7 @@ class CCEFile():
         yearBlob = self.repo.get_git_blob(self.cceFile['sha'])
         self.xmlString = base64.b64decode(yearBlob.content)
         self.root = etree.fromstring(self.xmlString)
-    
+
     def readXML(self):
         self.loadHeader()
 
@@ -95,7 +103,7 @@ class CCEFile():
             self.pagePos += 1
             try:
                 childOp(child)
-            except DataError as err:
+            except (DataError, sqlDataError) as err:
                 print('Caught error')
                 self.createErrorEntry(
                     getattr(err, 'uuid', child.get('id')),
@@ -117,7 +125,7 @@ class CCEFile():
 
     def parseEntry(self, entry, shared=[]):
         uuid = entry.get('id')
-        
+
         if 'regnum' not in entry.attrib:
             print('Entry Missing REGNUM')
             raise DataError(
@@ -125,9 +133,9 @@ class CCEFile():
                 uuid=uuid,
                 entry=entry
             )
-        
+
         regnums = self.loadRegnums(entry)
-        
+
         entryDates = self.loadDates(entry)
         regDates = entryDates['regDate']
         if(len(regnums) != len(regDates)):
@@ -140,7 +148,7 @@ class CCEFile():
                     regnum='; '.join(regnums),
                     entry=entry
                 )
-        
+
         regs = self.createRegistrations(regnums, regDates)
         existingRec = self.matchUUID(uuid)
         if existingRec:
@@ -159,11 +167,11 @@ class CCEFile():
         newMatter = len(entry.findall('newMatterClaimed')) > 0
 
         publishers = [
-            (c.text, c.get('claimant', None)) 
+            (c.text, c.get('claimant', None))
             for c in entry.findall('.//pubName')
         ]
 
-        lccn = [ lccnorm.normalize(l.text) for l in entry.findall('lccn') ]
+        lccn = [lccnorm.normalize(l.text) for l in entry.findall('lccn')]
 
         cceRec = CCE(
             uuid=uuid,
@@ -204,14 +212,17 @@ class CCEFile():
         rec.aff_date = CCEFile.fetchDateValue(dates['affDate'], text=False)
         rec.aff_date_text = CCEFile.fetchDateValue(dates['affDate'], text=True)
         rec.copy_date = CCEFile.fetchDateValue(dates['copyDate'], text=False)
-        rec.copy_date_text = CCEFile.fetchDateValue(dates['copyDate'], text=True)
+        rec.copy_date_text = CCEFile.fetchDateValue(
+            dates['copyDate'],
+            text=True
+        )
 
         authors = self.createAuthorList(entry, shared)
         publishers = [
-            (c.text, c.get('claimant', None)) 
+            (c.text, c.get('claimant', None))
             for c in entry.findall('.//pubName')
         ]
-        lccn = [ lccnorm.normalize(l.text) for l in entry.findall('lccn') ]
+        lccn = [lccnorm.normalize(l.text) for l in entry.findall('lccn')]
 
         rec.updateRelationships(
             entry,
@@ -228,9 +239,9 @@ class CCEFile():
             try:
                 regCat = re.match(r'([A-Z]+)', regnums[x][0]).group(1)
             except AttributeError:
-                regCat ='Unknown'
+                regCat = 'Unknown'
             registrations.append({
-                'regnum': regnums[x], 
+                'regnum': regnums[x],
                 'category': regCat,
                 'regDate': regdates[x][0],
                 'regDateText': regdates[x][1]
@@ -244,10 +255,12 @@ class CCEFile():
         outNums = []
         for num in regnums:
             parsedNum = self.parseRegNum(num)
-            if type(parsedNum) is str: outNums.append(parsedNum)
-            else: outNums.extend(parsedNum)
+            if type(parsedNum) is str:
+                outNums.append(parsedNum)
+            else:
+                outNums.extend(parsedNum)
         return outNums
-    
+
     def loadAddtlEntries(self, entry):
         moreRegnums = []
         for addtl in entry.findall('.//additionalEntry'):
@@ -257,7 +270,7 @@ class CCEFile():
             except AttributeError:
                 continue
         return moreRegnums
-    
+
     def parseRegNum(self, num):
         try:
             if (
@@ -270,14 +283,14 @@ class CCEFile():
                 regRangeStart = int(regnumRange[0].replace(regRangePrefix, ''))
                 regRangeEnd = int(regnumRange[1].replace(regRangePrefix, ''))
                 if regRangeEnd - regRangeStart < 1000:
-                    return [ 
+                    return [
                         '{}{}'.format(regRangePrefix, str(i))
                         for i in range(regRangeStart, regRangeEnd)
                     ]
-        except (ValueError, AttributeError) as err:
+        except (ValueError, AttributeError):
             print('RANGE ERROR', self.currentPage, self.pagePos)
             raise DataError('regnum_range_parsing_error')
-        
+
         return num
 
     def loadDates(self, entry):
@@ -293,12 +306,13 @@ class CCEFile():
                 dates['regDate'].append(dates['copyDate'][0])
             elif len(dates['pubDate']) > 0:
                 dates['regDate'].append(dates['pubDate'][0])
-        
+
         return dates
 
     @staticmethod
     def parseDate(date, dateFormat):
-        if date is None or dateFormat == '': return None
+        if date is None or dateFormat == '':
+            return None
 
         try:
             outDate = datetime.strptime(date, dateFormat)
@@ -308,7 +322,7 @@ class CCEFile():
 
     def createTitleList(self, entry, shared):
         return '; '.join([
-            t.text 
+            t.text
             for t in entry.findall('.//title') + [
                 t for t in shared if t.tag == 'title'
             ]
@@ -331,17 +345,20 @@ class CCEFile():
         entries = []
         shared = []
         for field in group:
-            if field.tag == 'page': self.parsePage(field)
-            elif field.tag == 'copyrightEntry': entries.append(field)
-            else: shared.append(field)
-        
-        for entry in entries: 
+            if field.tag == 'page':
+                self.parsePage(field)
+            elif field.tag == 'copyrightEntry':
+                entries.append(field)
+            else:
+                shared.append(field)
+
+        for entry in entries:
             try:
                 self.parseEntry(entry, shared)
             except DataError as err:
                 err.uuid = entry.get('id')
                 raise err
-        
+
     def createAuthorList(self, rec, shared=[]):
         authors = [
             (a.text, False) for a in rec.findall('.//authorName')
@@ -352,7 +369,7 @@ class CCEFile():
                 authors.append((rec.findall('.//authorName')[0].text, False))
             except IndexError:
                 pass
-        
+
         authors.extend([
             (a.text, False) for a in shared if a.tag == 'authorName'
         ])
@@ -361,9 +378,9 @@ class CCEFile():
             authors[0] = (authors[0][0], True)
         except IndexError:
             pass
-        
+
         return authors
-    
+
     def loadHeader(self):
         header = self.root.find('.//header')
 
@@ -374,7 +391,7 @@ class CCEFile():
         elif header.find('cite/division/number') is not None:
             volNum = CCEFile.fetchText(header, 'cite/division/number')
             startNum = volNum
-            endNum= volNum
+            endNum = volNum
 
         headerDict = {
             'source': header.find('source').get('url', None),
@@ -388,9 +405,9 @@ class CCEFile():
             'numbers': {
                 'start': startNum,
                 'end': endNum
-            }  
+            }
         }
-        
+
         self.fileHeader = Volume(
             source=headerDict['source'],
             status=headerDict['status'],
@@ -409,7 +426,7 @@ class CCEFile():
     def fetchText(parent, tag):
         element = parent.find(tag)
         return element.text if element is not None else None
-    
+
     @staticmethod
     def fetchDateValue(date, text=False):
         x = 1 if text else 0
