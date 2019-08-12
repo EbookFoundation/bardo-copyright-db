@@ -310,22 +310,22 @@ class SwaggerDoc():
                     }
                 },
                 'Registration': {
-                    'type': 'object', 
+                    'type': 'object',
                     'properties': {
                         'title': {
                             'type': 'string'
                         },
                         'copies': {
                             'type': 'string'
-                        }, 
+                        },
                         'copy_date': {
                             'type': 'string'
-                        }, 
+                        },
                         'description': {
                             'type': 'string'
                         },
                         'authors': {
-                            'type': 'array', 
+                            'type': 'array',
                             'items': {
                                 '$ref': '#/definitions/Agent'
                             }
@@ -335,14 +335,14 @@ class SwaggerDoc():
                             'items': {
                                 '$ref': '#/definitions/Agent'
                             }
-                        }, 
+                        },
                         'registrations': {
                             'type': 'array',
                             'items': {
                                 '$ref': '#/definitions/RegRegistration'
                             }
-                        }, 
-                        'renewals':{
+                        },
+                        'renewals': {
                             'type': 'array',
                             'items': {
                                 '$ref': '#/definitions/Renewal'
@@ -353,35 +353,44 @@ class SwaggerDoc():
                             'properties': {
                                 'page': {
                                     'type': 'integer'
-                                }, 
+                                },
                                 'page_position': {
                                     'type': 'integer'
-                                }, 
+                                },
                                 'part': {
                                     'type': 'string'
-                                }, 
+                                },
+                                'group': {
+                                    'type': 'integer'
+                                },
                                 'series': {
                                     'type': 'string'
-                                }, 
+                                },
+                                'volume': {
+                                    'type': 'integer'
+                                },
+                                'matter': {
+                                    'type': 'string'
+                                },
                                 'url': {
                                     'type': 'string'
-                                }, 
+                                },
                                 'year': {
                                     'type': 'integer'
                                 }
                             }
                         }
                     }
-                }, 
+                },
                 'Agent': {
                     'type': 'string'
-                }, 
+                },
                 'RegRegistration': {
-                    'type': 'object', 
+                    'type': 'object',
                     'properties': {
                         'number': {
                             'type': 'string'
-                        }, 
+                        },
                         'date': {
                             'type': 'string'
                         }
