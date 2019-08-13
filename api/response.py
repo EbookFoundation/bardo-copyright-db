@@ -38,14 +38,27 @@ class Response():
             'authors': [a.name for a in dbEntry.authors],
             'publishers': [p.name for p in dbEntry.publishers],
             'source': {
-                'url': dbEntry.volume.source,
-                'series': dbEntry.volume.series,
-                'year': dbEntry.volume.year,
-                'part': dbEntry.volume.part,
                 'page': dbEntry.page,
-                'page_position': dbEntry.page_position
+                'page_position': dbEntry.page_position,
+                'part': dbEntry.volume.part,
+                'group': dbEntry.volume.group,
+                'series': dbEntry.volume.series,
+                'volume': dbEntry.volume.volume,
+                'matter': dbEntry.volume.material,
+                'url': dbEntry.volume.source,
+                'year': dbEntry.volume.year
             }
         }
+
+        if '3' in response['source']['series']:
+            startNum = dbEntry.volume.start_number
+            endNum = dbEntry.volume.end_number
+            if startNum == endNum:
+                outNum = startNum
+            else:
+                outNum = '{}-{}'.format(startNum, endNum)
+            response['source']['number'] = outNum
+
         response['renewals'] = [
             cls.parseRenewal(ren, source=xml)
             for reg in dbEntry.registrations
