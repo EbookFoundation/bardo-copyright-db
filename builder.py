@@ -432,13 +432,18 @@ class CCEFile():
 
     @staticmethod
     def fetchDateValue(date, text=False):
+        date.sort(key=lambda x: len(x[0]), reverse=True)
         if len(date) > 0:
-            if text is False:
-                try:
-                    return parser.parse(date[0][0])
-                except (ValueError, TypeError):
-                    pass
-            else:
-                return date[0][1]
+            return CCEFile.dateReader(date[0], text)
 
         return None
+
+    @staticmethod
+    def dateReader(date, text=False):
+        if text is False:
+            try:
+                return parser.parse(date[0])
+            except (ValueError, TypeError):
+                return None
+        else:
+            return date[1]
