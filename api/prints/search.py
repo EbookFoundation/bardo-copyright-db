@@ -77,6 +77,31 @@ def regQuery(regnum):
     return make_response(jsonify(regResponse.createResponse(200)), 200)
 
 
+@search.route('/lccn/<lccn>', methods=['GET'])
+def lccnQuery(lccn):
+    page, perPage = MultiResponse.parsePaging(request.args)
+    sourceReturn = request.args.get('source', False)
+    matchingDocs = elastic.query_lccn(lccn, page=page, perPage=perPage)
+    regResponse = MultiResponse(
+        'number',
+        matchingDocs.hits.total,
+        request.base_url,
+        lccn,
+        page,
+        perPage
+    )
+    qManager = QueryManager(db.session)
+    for entry in matchingDocs:
+        dbEntry = qManager.registrationQuery(entry.uuid)
+        regResponse.addResult(MultiResponse.parseEntry(
+            dbEntry,
+            xml=sourceReturn
+        ))
+
+    regResponse.createDataBlock()
+    return make_response(jsonify(regResponse.createResponse(200)), 200)
+
+
 @search.route('/renewal/<rennum>', methods=['GET'])
 def renQuery(rennum):
     page, perPage = MultiResponse.parsePaging(request.args)

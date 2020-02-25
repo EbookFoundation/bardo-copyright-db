@@ -26,15 +26,21 @@ class Elastic():
     
     def query_fulltext(self, queryText, page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
-        print(startPos, endPos)
         search = self.create_search('cce,ccr')
         renewalSearch = search.query('query_string', query=queryText)[startPos:endPos]
         return renewalSearch.execute()
-    
+
+    def query_lccn(self, lccn, page=0, perPage=10):
+        startPos, endPos = Elastic.getFromSize(page, perPage)
+        search = self.create_search('cce')
+        renewalSearch = search.query('term', lccns=lccn)[startPos:endPos]
+        return renewalSearch.execute()
+
     @staticmethod
     def getFromSize(page, perPage):
         startPos = page * perPage
         endPos = startPos + perPage
         return startPos, endPos
+
 
 elastic = Elastic()
