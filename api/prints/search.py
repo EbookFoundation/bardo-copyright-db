@@ -3,7 +3,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from api.db import db, QueryManager
 from api.elastic import elastic
-from api.response import MultiResponse
+from api.response import MultiResponse, Response
+from helpers.errors import DataError
 
 search = Blueprint('search', __name__, url_prefix='/search')
 
@@ -77,13 +78,19 @@ def regQuery(regnum):
     return make_response(jsonify(regResponse.createResponse(200)), 200)
 
 
-@search.route('/lccn/<lccn>', methods=['GET'])
+@search.route('/lccn/<path:lccn>', methods=['GET'])
 def lccnQuery(lccn):
     page, perPage = MultiResponse.parsePaging(request.args)
     sourceReturn = request.args.get('source', False)
-    matchingDocs = elastic.query_lccn(lccn, page=page, perPage=perPage)
+
+    try:
+        matchingDocs = elastic.query_lccn(lccn, page=page, perPage=perPage)
+    except DataError as err:
+        errResp = Response('lccn', request.base_url)
+        return make_response(jsonify(errResp.createResponse(400, err=err)), 400)
+
     regResponse = MultiResponse(
-        'number',
+        'lccn',
         matchingDocs.hits.total,
         request.base_url,
         lccn,

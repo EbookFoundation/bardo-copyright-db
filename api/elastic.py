@@ -1,5 +1,9 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
+from lccnorm import is_valid, normalize, InvalidLccnError
+
+from helpers.errors import DataError
+
 
 class Elastic():
     def __init__(self):
@@ -33,7 +37,8 @@ class Elastic():
     def query_lccn(self, lccn, page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
         search = self.create_search('cce')
-        renewalSearch = search.query('term', lccns=lccn)[startPos:endPos]
+        normalLCCN = Elastic.normalizeAndValidateLCCN(lccn)
+        renewalSearch = search.query('term', lccns=normalLCCN)[startPos:endPos]
         return renewalSearch.execute()
 
     @staticmethod
@@ -41,6 +46,17 @@ class Elastic():
         startPos = page * perPage
         endPos = startPos + perPage
         return startPos, endPos
+
+    @staticmethod
+    def normalizeAndValidateLCCN(lccn):
+        try:
+            normalizedLCCN = normalize(lccn)
+            if is_valid(normalizedLCCN):
+                return normalizedLCCN
+        except InvalidLccnError:
+            pass
+
+        raise DataError('Invalid LCCN queried')
 
 
 elastic = Elastic()
