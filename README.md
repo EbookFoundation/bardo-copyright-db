@@ -94,6 +94,7 @@ The search endpoints return many or no object depending on what search terms are
 The individual endpoints are:
 
 - `/search/fulltext?query=<query string>`: A full text query
+- `/search/lccn/<lccn>`: A query for a Library of Congress Control Number (LCCN)
 - `/search/registration/<regnum>`: A search for a specific registration number
 - `/search/renewal/<rennum>`: A search for a specific renewal number
 

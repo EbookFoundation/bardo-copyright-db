@@ -47,7 +47,8 @@ class Response():
                 'matter': dbEntry.volume.material,
                 'url': dbEntry.volume.source,
                 'year': dbEntry.volume.year
-            }
+            },
+            'lccns': [l.lccn for l in dbEntry.lccns]
         }
 
         if '3' in response['source']['series']:

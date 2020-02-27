@@ -15,7 +15,7 @@ class SwaggerDoc():
                 'email': 'michaelbenowitz@nypl.org',
                 'url': 'www.nypl.org',
                 },
-                'version': 'v0.1'
+                'version': 'v0.2.3'
             },
             'basePath': '/',  # base bash for blueprint registration
             'schemes': [
@@ -139,6 +139,51 @@ class SwaggerDoc():
                                 'required': False,
                                 'default': 0
                             },{
+                                'name': 'per_page',
+                                'in': 'query',
+                                'type': 'number',
+                                'required': False,
+                                'default': 10
+                            }
+                        ],
+                        'responses': {
+                            200: {
+                                'description': 'A list of copyright registrations and renewals',
+                                'schema': {
+                                    '$ref': '#/definitions/MultiResponse'
+                                }
+                            }
+                        }
+                    }
+                },
+                '/search/lccn/{lccn}': {
+                    'get': {
+                        'tags': ['Search'],
+                        'summary': 'Returns a set of registration and renewal objects',
+                        'description': 'Accepts a Library of Congress Control Number (LCCN) and returns all matching records',
+                        'parameters': [
+                            {
+                                'name': 'lccn',
+                                'in': 'path',
+                                'required': True,
+                                'schema': {
+                                    'type': 'string'
+                                },
+                                'description': 'Library of Congress Control Number (LCCN)'
+                            },{
+                                'name': 'source',
+                                'in': 'query',
+                                'type': 'boolean',
+                                'required': False,
+                                'default': False,
+                                'description': 'Return source XML/CSV data'
+                            },{
+                                'name': 'page',
+                                'in': 'query',
+                                'type': 'number',
+                                'required': False,
+                                'default': 0
+                            }, {
                                 'name': 'per_page',
                                 'in': 'query',
                                 'type': 'number',
