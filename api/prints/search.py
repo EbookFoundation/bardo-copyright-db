@@ -226,7 +226,7 @@ def renQuery(rennum):
     return jsonify(renResponse.createResponse(200))
 
 
-def parseRetRenewal(dbRenewal):
+def parseRetRenewal(dbRenewal, source):
     if len(dbRenewal.registrations) == 0:
         return [MultiResponse.parseRenewal(dbRenewal)]
 
