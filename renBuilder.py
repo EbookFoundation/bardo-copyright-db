@@ -14,9 +14,10 @@ from model.registration import Registration
 class CCRReader():
     def __init__(self, manager):
         self.git = Github(os.environ['ACCESS_TOKEN'])
+        print(self.git)
         self.repo = self.git.get_repo(os.environ['CCR_REPO'])
+        print(self.repo)
         self.ccrYears = {}
-
         self.dbManager = manager
 
     def loadYears(self, selectedYear, loadFromTime):

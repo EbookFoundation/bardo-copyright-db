@@ -1,5 +1,6 @@
 import os
 import yaml
+import pprint
 from elasticsearch_dsl import (
     Index,
     Document,
@@ -16,14 +17,14 @@ class BaseDoc(Document):
     date_modified = Date()
 
     def save(self, **kwargs):
-        return super(BaseDoc, self).save(**kwargs)
+        return super(BaseDoc, self).save(** kwargs)
 
 class BaseInner(InnerDoc):
     date_created = Date()
     date_modified = Date()
 
     def save(self, **kwargs):
-        return super(BaseInner, self).save(**kwargs)
+        return super(BaseInner, self).save(** kwargs)
 
 
 class Registration(BaseInner):
@@ -41,9 +42,10 @@ class Renewal(BaseDoc):
     rennum = Keyword()
     rendate = Date()
     title = Text(fields={'keyword': Keyword()})
-    
-    claimants = Nested(Claimant)
+    authors = Text()
 
+    claimants = Nested(Claimant)
+    # pprint.pprint(dict(os.environ), width = 1) 
     class Index:
         name = os.environ['ES_CCR_INDEX']
 
@@ -54,7 +56,6 @@ class CCE(BaseDoc):
     authors = Text(multi=True)
     publishers = Text(multi=True)
     lccns = Keyword(multi=True)
-
     registrations = Nested(Registration)
 
     class Index:
