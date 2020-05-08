@@ -58,7 +58,7 @@ class ESIndexer():
         if self.client.indices.exists(index=self.ccr_index) is False:
             Renewal.init()
     
-    def indexRecords(self, recType='ccr'):
+    def indexRecords(self, recType='cce'):
         """Process the current batch of updating records. This utilizes the
         elasticsearch-py bulk helper to import records in chunks of the
         provided size. If a record in the batch errors that is reported and
