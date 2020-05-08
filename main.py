@@ -37,7 +37,7 @@ def loadCCR(manager, loadFromTime, selectedYear):
 
 def indexUpdates(manager, loadFromTime):
     esIndexer = ESIndexer(manager, None)
-    # esIndexer.indexRecords(recType='cce')
+    esIndexer.indexRecords(recType='cce')
     esIndexer.indexRecords(recType='ccr')
 
 
@@ -80,10 +80,7 @@ if __name__ == '__main__':
     from builder import CCEReader, CCEFile
     from renBuilder import CCRReader, CCRFile
     from esIndexer import ESIndexer
-    print(args.time)
-    print(args.year)
-    print(args.exclude)
-    print(args.REINITIALIZE)
+
     main(
         secondsAgo=args.time,
         year=args.year,
