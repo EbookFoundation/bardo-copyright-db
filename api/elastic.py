@@ -31,7 +31,6 @@ class Elastic():
     
     def query_fulltext(self, queryText, page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
-        print(startPos, endPos)
         search = self.create_search('cce,ccr')
         renewalSearch = search.query('query_string', query=queryText)[startPos:endPos]
         return renewalSearch.execute()
@@ -39,25 +38,20 @@ class Elastic():
     #New Query Types
     def query_title(self, queryText,page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
-        print(startPos, endPos)
         search = self.create_search('cce,ccr')
         titleSearch = search.query('match', title=queryText)[startPos:endPos]
-        print(titleSearch.to_dict())
         return titleSearch.execute()
 
     def query_author(self, queryText,page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
-        print(startPos, endPos)
         search = self.create_search('cce,ccr')
         titleSearch = search.query('match', authors=queryText)[startPos:endPos]
-        print(titleSearch.to_dict())
         return titleSearch.execute()
 
 
     # If query is given for publisher field, don't check renewals?
     def query_multifields(self, params, page=0, perPage=10):
         startPos, endPos = Elastic.getFromSize(page, perPage)
-        print(startPos, endPos)
         if "publishers" in params:
             search = self.create_search('cce')
             search = search.query('match', publishers=params["publishers"])
