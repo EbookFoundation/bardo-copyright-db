@@ -23,7 +23,6 @@ def multiQuery():
         queries["authors"]=authors
     if publishers!="*" and publishers!="":
         queries["publishers"]=publishers
-    print(queries)
     matchingDocs = elastic.query_multifields(queries, page=page, perPage=perPage)
     textResponse = MultiResponse(
         'text',
@@ -218,15 +217,14 @@ def renQuery(rennum):
     for entry in matchingDocs:
         dbRenewal = qManager.renewalQuery(entry.uuid)
         renResponse.extendResults(parseRetRenewal(
-            dbRenewal,
-            source=sourceReturn    
+            dbRenewal
         ))
 
     renResponse.createDataBlock()
     return jsonify(renResponse.createResponse(200))
 
 
-def parseRetRenewal(dbRenewal, source):
+def parseRetRenewal(dbRenewal):
     if len(dbRenewal.registrations) == 0:
         return [MultiResponse.parseRenewal(dbRenewal)]
 
