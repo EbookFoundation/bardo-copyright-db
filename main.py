@@ -14,10 +14,10 @@ def main(secondsAgo=None, year=None, exclude=None, reinit=False):
     startTime = datetime.now()
     if secondsAgo is not None:
         loadFromTime = startTime - timedelta(seconds=secondsAgo)
-    # if exclude != 'cce':
-        # loadCCE(manager, loadFromTime, year)
-    # if exclude != 'ccr':
-    # loadCCR(manager, loadFromTime, year)
+    if exclude != 'cce':
+        loadCCE(manager, loadFromTime, year)
+    if exclude != 'ccr':
+        loadCCR(manager, loadFromTime, year)
     indexUpdates(manager, loadFromTime)
     
     manager.closeConnection()
