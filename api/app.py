@@ -2,10 +2,10 @@ import os
 import yaml
 from flask import Flask, jsonify
 from flasgger import Swagger
-from prints.swagger.swag import SwaggerDoc
-from db import db
-from elastic import elastic
-from prints import base, search, uuid
+from .prints.swagger.swag import SwaggerDoc
+from .db import db
+from .elastic import elastic
+from .prints import base, search, uuid
 
 def loadConfig():
     with open('config.yaml-dist', 'r') as yamlFile:
