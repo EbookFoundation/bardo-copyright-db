@@ -1,18 +1,18 @@
 DATABASE:
-  DB_USER: postgres
-  DB_PSWD: "9903"
-  DB_HOST: localhost
-  DB_PORT: "5432"
-  DB_NAME: ccesearch
+  DB_USER: 
+  DB_PSWD: 
+  DB_HOST: 
+  DB_PORT: 
+  DB_NAME: 
 
 GITHUB:
-  ACCESS_TOKEN: 218124e9bf09a9b3f379cb5ee1ab0a8756ee3b3c
-  CCE_REPO: nypl/catalog_of_copyright_entries_project
-  CCR_REPO: nypl/cce-renewals
+  ACCESS_TOKEN: 
+  CCE_REPO:
+  CCR_REPO:
 
 ELASTICSEARCH:
-  ES_CCE_INDEX: cce
-  ES_CCR_INDEX: ccr
-  ES_HOST: localhost
-  ES_PORT: '9200'
-  ES_TIMEOUT: "10000"
+  ES_CCE_INDEX:
+  ES_CCR_INDEX:
+  ES_HOST: 
+  ES_PORT: 
+  ES_TIMEOUT:
