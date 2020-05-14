@@ -23,6 +23,147 @@ class SwaggerDoc():
                 "https"
             ],
             "paths": {
+                "/search/multi": {
+                    "get": {
+                        "tags": ["Search"],
+                        "summary": "Returns a set of registration and renewal objects",
+                        "description": "Accepts a query string to search across both registration and renewal records in the author field",
+                        "parameters": [
+                            {
+                                "name": "title",
+                                "in": "query",
+                                "type": "string",
+                                "required": False,
+                                "default": "*"
+                            },{
+                                "name": "authors",
+                                "in": "query",
+                                "type": "string",
+                                "required": False,
+                                "default": "*"
+                            },{
+                                "name": "publishers",
+                                "in": "query",
+                                "type": "string",
+                                "required": False,
+                                "default": "*"
+                            },{
+                                "name": "source",
+                                "in": "query",
+                                "type": "boolean",
+                                "required": False,
+                                "default": False,
+                                "description": "Return source XML/CSV data"
+                            },{
+                                "name": "page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 0
+                            },{
+                                "name": "per_page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 10
+                            }
+                        ],
+                        "responses": {
+                            200: {
+                                "description": "A list of copyright registrations and renewals",
+                                "schema": {
+                                    "$ref": "#/definitions/MultiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "/search/author": {
+                    "get": {
+                        "tags": ["Search"],
+                        "summary": "Returns a set of registration and renewal objects",
+                        "description": "Accepts a query string to search across both registration and renewal records in the author field",
+                        "parameters": [
+                            {
+                                "name": "query",
+                                "in": "query",
+                                "type": "string",
+                                "required": True,
+                                "default": "*"
+                            },{
+                                "name": "source",
+                                "in": "query",
+                                "type": "boolean",
+                                "required": False,
+                                "default": False,
+                                "description": "Return source XML/CSV data"
+                            },{
+                                "name": "page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 0
+                            },{
+                                "name": "per_page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 10
+                            }
+                        ],
+                        "responses": {
+                            200: {
+                                "description": "A list of copyright registrations and renewals",
+                                "schema": {
+                                    "$ref": "#/definitions/MultiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "/search/title": {
+                    "get": {
+                        "tags": ["Search"],
+                        "summary": "Returns a set of registration and renewal objects",
+                        "description": "Accepts a query string to search across both registration and renewal records in the title fiel",
+                        "parameters": [
+                            {
+                                "name": "query",
+                                "in": "query",
+                                "type": "string",
+                                "required": True,
+                                "default": "*"
+                            },{
+                                "name": "source",
+                                "in": "query",
+                                "type": "boolean",
+                                "required": False,
+                                "default": False,
+                                "description": "Return source XML/CSV data"
+                            },{
+                                "name": "page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 0
+                            },{
+                                "name": "per_page",
+                                "in": "query",
+                                "type": "number",
+                                "required": False,
+                                "default": 10
+                            }
+                        ],
+                        "responses": {
+                            200: {
+                                "description": "A list of copyright registrations and renewals",
+                                "schema": {
+                                    "$ref": "#/definitions/MultiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
                 "/search/fulltext": {
                     "get": {
                         "tags": ["Search"],

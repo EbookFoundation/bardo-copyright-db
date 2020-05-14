@@ -148,6 +148,7 @@ class ESRen():
         self.renewal.rennum = self.dbRen.renewal_num
         self.renewal.rendate = self.dbRen.renewal_date
         self.renewal.title = self.dbRen.title
+        self.renewal.authors = self.dbRen.author
         self.renewal.claimants = [
             Claimant(name=c.name, claim_type=c.claimant_type)
             for c in self.dbRen.claimants

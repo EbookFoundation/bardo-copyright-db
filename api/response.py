@@ -1,3 +1,4 @@
+import math
 
 class Response():
     def __init__(self, queryType, endpoint):
@@ -151,7 +152,7 @@ class MultiResponse(Response):
         else:
             paging['next'] = None
         
-        lastPage = int((self.total - self.perPage) / self.perPage)
+        lastPage = math.ceil(((self.total - self.perPage) / self.perPage))
         if (
             self.page * self.perPage < self.total and 
             self.total > self.perPage

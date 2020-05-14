@@ -9,6 +9,131 @@ from api.response import MultiResponse
 
 search = Blueprint('search', __name__, url_prefix='/search')
 
+@search.route('/multi', methods=['GET'])
+def multiQuery():
+    title = request.args.get('title', '')
+    authors = request.args.get('authors', '')
+    publishers = request.args.get('publishers','')
+    sourceReturn = request.args.get('source', False)
+    page, perPage = MultiResponse.parsePaging(request.args)
+    queries = {}
+    if title!="*" and title!="":
+        queries["title"]=title
+    if authors!="*" and authors!="":
+        queries["authors"]=authors
+    if publishers!="*" and publishers!="":
+        queries["publishers"]=publishers
+    matchingDocs = elastic.query_multifields(queries, page=page, perPage=perPage)
+    textResponse = MultiResponse(
+        'text',
+        matchingDocs.hits.total,
+        request.base_url,
+        queries,
+        page,
+        perPage
+    )
+    qManager = QueryManager(db.session)
+    for entry in matchingDocs:
+        if entry.meta.index == 'cce':
+            dbEntry = qManager.registrationQuery(entry.uuid)
+            textResponse.addResult(MultiResponse.parseEntry(
+                dbEntry, 
+                xml=sourceReturn
+            ))
+        else:
+            try:
+                dbRenewal = qManager.renewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+            except NoResultFound:
+                dbRenewal = qManager.orphanRenewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+
+    textResponse.createDataBlock()    
+    return jsonify(textResponse.createResponse(200))
+
+@search.route('/author', methods=['GET'])
+def authorQuery():
+    queryText = request.args.get('query', '')
+    sourceReturn = request.args.get('source', False)
+    page, perPage = MultiResponse.parsePaging(request.args)
+    matchingDocs = elastic.query_author(queryText, page=page, perPage=perPage)
+    textResponse = MultiResponse(
+        'text',
+        matchingDocs.hits.total,
+        request.base_url,
+        queryText,
+        page,
+        perPage
+    )
+    qManager = QueryManager(db.session)
+    for entry in matchingDocs:
+        if entry.meta.index == 'cce':
+            dbEntry = qManager.registrationQuery(entry.uuid)
+            textResponse.addResult(MultiResponse.parseEntry(
+                dbEntry, 
+                xml=sourceReturn
+            ))
+        else:
+            try:
+                dbRenewal = qManager.renewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+            except NoResultFound:
+                dbRenewal = qManager.orphanRenewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+
+    textResponse.createDataBlock()    
+    return jsonify(textResponse.createResponse(200))
+
+@search.route('/title', methods=['GET'])
+def titleQuery():
+    queryText = request.args.get('query', '')
+    sourceReturn = request.args.get('source', False)
+    page, perPage = MultiResponse.parsePaging(request.args)
+    matchingDocs = elastic.query_title(queryText, page=page, perPage=perPage)
+    textResponse = MultiResponse(
+        'text',
+        matchingDocs.hits.total,
+        request.base_url,
+        queryText,
+        page,
+        perPage
+    )
+    qManager = QueryManager(db.session)
+    for entry in matchingDocs:
+        if entry.meta.index == 'cce':
+            dbEntry = qManager.registrationQuery(entry.uuid)
+            textResponse.addResult(MultiResponse.parseEntry(
+                dbEntry, 
+                xml=sourceReturn
+            ))
+        else:
+            try:
+                dbRenewal = qManager.renewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+            except NoResultFound:
+                dbRenewal = qManager.orphanRenewalQuery(entry.uuid)
+                textResponse.addResult(MultiResponse.parseRenewal(
+                    dbRenewal,
+                    source=sourceReturn
+                ))
+
+    textResponse.createDataBlock()    
+    return jsonify(textResponse.createResponse(200))
 
 @search.route('/fulltext', methods=['GET'])
 def fullTextQuery():
@@ -92,8 +217,7 @@ def renQuery(rennum):
     for entry in matchingDocs:
         dbRenewal = qManager.renewalQuery(entry.uuid)
         renResponse.extendResults(parseRetRenewal(
-            dbRenewal,
-            source=sourceReturn    
+            dbRenewal
         ))
 
     renResponse.createDataBlock()

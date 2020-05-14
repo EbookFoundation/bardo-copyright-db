@@ -41,9 +41,9 @@ class Renewal(BaseDoc):
     rennum = Keyword()
     rendate = Date()
     title = Text(fields={'keyword': Keyword()})
-    
-    claimants = Nested(Claimant)
+    authors = Text()
 
+    claimants = Nested(Claimant)
     class Index:
         name = os.environ['ES_CCR_INDEX']
 
@@ -54,7 +54,6 @@ class CCE(BaseDoc):
     authors = Text(multi=True)
     publishers = Text(multi=True)
     lccns = Keyword(multi=True)
-
     registrations = Nested(Registration)
 
     class Index:

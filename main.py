@@ -14,12 +14,10 @@ def main(secondsAgo=None, year=None, exclude=None, reinit=False):
     startTime = datetime.now()
     if secondsAgo is not None:
         loadFromTime = startTime - timedelta(seconds=secondsAgo)
-
     if exclude != 'cce':
         loadCCE(manager, loadFromTime, year)
     if exclude != 'ccr':
         loadCCR(manager, loadFromTime, year)
-    
     indexUpdates(manager, loadFromTime)
     
     manager.closeConnection()
@@ -62,7 +60,7 @@ def parseArgs():
 
 
 def loadConfig():
-    with open('config.yaml', 'r') as yamlFile:
+    with open('config.yaml-dist', 'r') as yamlFile:
         config = yaml.safe_load(yamlFile)
         for section in config:
             sectionDict = config[section]
@@ -75,6 +73,7 @@ if __name__ == '__main__':
     try:
         loadConfig()
     except FileNotFoundError:
+        print("Unable to set environment variables")
         pass
 
     from sessionManager import SessionManager

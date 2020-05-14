@@ -6,6 +6,13 @@ from lxml import etree
 import os
 import re
 import traceback
+import sys
+
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+
+sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 from model.cce import CCE
 from model.errorCCE import ErrorCCE

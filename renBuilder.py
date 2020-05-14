@@ -16,7 +16,6 @@ class CCRReader():
         self.git = Github(os.environ['ACCESS_TOKEN'])
         self.repo = self.git.get_repo(os.environ['CCR_REPO'])
         self.ccrYears = {}
-
         self.dbManager = manager
 
     def loadYears(self, selectedYear, loadFromTime):
